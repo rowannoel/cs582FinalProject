@@ -14,7 +14,7 @@ print(">>> RUNNING NEW APP.PY <<<")
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "Eleda5609%",   # <--- replace with your real password
+    "password": "(I am hiding my password)",   # <--- replace with your real password
     "database": "shoplite"
 }
 
@@ -190,3 +190,4 @@ def api_low_stock():
 if __name__ == "__main__":
     print("Starting backend server on http://127.0.0.1:5000")
     app.run(debug=True)
+
