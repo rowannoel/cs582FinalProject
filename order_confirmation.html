@@ -7,10 +7,11 @@
     <script src="js/order_confirmation.js" defer></script>
     <meta http-equiv="Content-Security-Policy"
 	      content="
-	        default-src 'self' https://rowannoel.github.io https://rowannoel.github.io/cs582FinalProject;
-	        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://rowannoel.github.io https://rowannoel.github.io/cs582FinalProject;
-	        connect-src http://localhost:5000 http://127.0.0.1:5000;
-	        style-src 'self' 'unsafe-inline' https://rowannoel.github.io https://rowannoel.github.io/cs582FinalProject;
+	        default-src 'self' https://rowannoel.github.io https://cdn.jsdelivr.net;
+	        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://rowannoel.github.io;
+	        style-src 'self' 'unsafe-inline';
+	        img-src 'self' data:;
+	        connect-src 'self' https: http: http://localhost:5000 http://127.0.0.1:5000;
 	      ">
 
 </head>
