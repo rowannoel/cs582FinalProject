@@ -14,9 +14,10 @@ print(">>> RUNNING NEW APP.PY <<<")
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "(I am hiding my password)",   # <--- replace with your real password
+    "password": "(am hiding my password)",   # <--- replace with your real password
     "database": "shoplite"
 }
+
 
 def get_db():
     return mysql.connector.connect(**DB_CONFIG)
@@ -28,6 +29,12 @@ def get_db():
 def api_products():
     conn = get_db()
     cur = conn.cursor(dictionary=True)
+    print(">>> DB CONNECTION:", conn)
+    cur.execute("SELECT @@hostname, @@port;")
+    print(">>> ACTUAL MYSQL:", cur.fetchall())
+    cur.execute("SELECT DATABASE();")
+    print(">>> USING DB:", cur.fetchall())
+
     cur.execute("SELECT * FROM products;")
     rows = cur.fetchall()
     conn.close()
@@ -67,12 +74,16 @@ def api_get_order(order_id):
 # ---------------------------
 @app.post("/api/order")
 def api_create_order():
+    print(">>> ORDER ROUTE HIT <<<")
     data = request.get_json()
+    print(">>> RECEIVED DATA:", data)
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
 
     customer = data.get("customer", {})
     items = data.get("items", [])
+    print(">>> CUSTOMER:", customer)
+    print(">>> ITEMS:", items)
 
     if not items:
         return jsonify({"error": "Cart is empty"}), 400
@@ -82,6 +93,7 @@ def api_create_order():
 
     try:
         # Insert placeholder order
+        print(">>> ABOUT TO INSERT ORDER")
         cur.execute("""
             INSERT INTO orders
             (customer_name, customer_email, customer_address,
@@ -102,6 +114,7 @@ def api_create_order():
 
         # Insert each item
         for item in items:
+            print(">>> ITEM:", item)
             pid = int(item["product_id"])
             qty = int(item["quantity"])
             price = float(item["price"])
@@ -125,6 +138,7 @@ def api_create_order():
             UPDATE orders SET total_amount = %s WHERE id = %s
         """, (total_amount, order_id))
 
+        print(">>> ORDER COMMITTING")
         conn.commit()
 
         return jsonify({"order_id": order_id})
@@ -183,11 +197,24 @@ def api_low_stock():
     conn.close()
     return jsonify(rows)
 
+@app.get("/api/debug/db")
+def api_debug_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT DATABASE(), @@hostname, @@port;")
+    result = cur.fetchall()
+    conn.close()
+    return jsonify({"db_info": result})
+
+
 
 # ---------------------------
 # START FLASK SERVER
 # ---------------------------
+print(">>> ROUTES LOADED:")
+for rule in app.url_map.iter_rules():
+    print("  ", rule)
+
 if __name__ == "__main__":
     print("Starting backend server on http://127.0.0.1:5000")
     app.run(debug=True)
-
