@@ -11,20 +11,25 @@ function saveCart(cart) {
 
 function addToCart(productId, name, price) {
     const cart = getCart();
-    const existing = cart.find(i => i.product_id === productId);
+
+    // Check if already in cart
+    const existing = cart.find(item => item.product_id === productId);
+
     if (existing) {
         existing.quantity += 1;
     } else {
         cart.push({
             product_id: productId,
             name: name,
-            price: parseFloat(price),
+            price: price,
             quantity: 1
         });
     }
+
     saveCart(cart);
-    alert("Added to cart.");
+    alert("Added to cart!");
 }
+
 
 function updateCartQuantity(index, qty) {
     const cart = getCart();
