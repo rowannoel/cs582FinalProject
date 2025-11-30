@@ -1,7 +1,7 @@
 # ShopLite – CS 582 Final Project  
 Authors: Rowan Noel-Rickert   
 Instructor: Vinay  
-Semester: Fall 2024  
+Semester: Fall 2025  
 
 ---
 
@@ -307,6 +307,7 @@ erDiagram
         int total_orders
     }
 ```
+
 
 
 
