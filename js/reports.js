@@ -1,19 +1,3 @@
-//Used by reports.html (with Chart.js CDN loaded in the HTML).
-
-// Auto-detect backend API location
-const API_BASE = (() => {
-    // Local HTML server
-    if (window.location.origin.includes("localhost:8000")) {
-        return "http://127.0.0.1:5000";
-    }
-    // GitHub Pages (production)
-    return "https://rowannoel.github.io/cs582FinalProject";
-})();
-
-let salesChart = null;
-
-document.addEventListener("DOMContentLoaded", () => {
-    // ... rest of your code
 
 let salesChart = null;
 
@@ -79,14 +63,26 @@ async function loadDailySales() {
                     {
                         label: "Daily Revenue",
                         data: data.revenues,
-                        fill: false
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
                     },
                     {
                         label: "7-Day Moving Avg",
                         data: data.moving_avg,
-                        fill: false
+                        fill: false,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
                     }
                 ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
         });
     } catch (err) {
