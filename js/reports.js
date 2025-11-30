@@ -1,5 +1,20 @@
 //Used by reports.html (with Chart.js CDN loaded in the HTML).
 
+// Auto-detect backend API location
+const API_BASE = (() => {
+    // Local HTML server
+    if (window.location.origin.includes("localhost:8000")) {
+        return "http://127.0.0.1:5000";
+    }
+    // GitHub Pages (production)
+    return "https://rowannoel.github.io/cs582FinalProject";
+})();
+
+let salesChart = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    // ... rest of your code
+
 let salesChart = null;
 
 document.addEventListener("DOMContentLoaded", () => {
