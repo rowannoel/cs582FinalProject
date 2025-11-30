@@ -1,14 +1,4 @@
 // data_tools.html
-// Auto-detect backend API location
-const API_BASE = (() => {
-    // Local HTML server
-    if (window.location.origin.includes("localhost:8000")) {
-        return "http://127.0.0.1:5000";
-    }
-    // GitHub Pages (production)
-    return "https://rowannoel.github.io/cs582FinalProject";
-})();
-
 async function checkOrderTotals() {
     const statusDiv = document.getElementById("orderTotalsStatus");
     try {
