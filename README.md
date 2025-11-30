@@ -1,4 +1,4 @@
-# ShopLite � CS 582 Final Project  
+# ShopLite – CS 582 Final Project  
 Authors: Rowan Noel-Rickert   
 Instructor: Vinay  
 Semester: Fall 2024  
@@ -44,7 +44,7 @@ API calls point to:
 
 http://127.0.0.1:5000/api/...
 
-GitHub Pages ? Localhost communication works because CORS is enabled in the backend.
+GitHub Pages → Localhost communication works because CORS is enabled in the backend.
 
 ---
 
@@ -129,7 +129,7 @@ http://127.0.0.1:5000
 ## 6. Running the Frontend (GitHub Pages)
 
 1. Push the frontend folder to GitHub  
-2. Enable GitHub Pages ? �Deploy from /root folder�  
+2. Enable GitHub Pages → “Deploy from /root folder”  
 3. Visit:
 
 https://<rowannoel>.github.io/<cs582FinalProject>/
@@ -201,8 +201,8 @@ ShopLite/
 
 ### Order Items  
 - id (PK)  
-- order_id (FK ? orders.id)  
-- product_id (FK ? products.id)  
+- order_id (FK → orders.id)  
+- product_id (FK → products.id)  
 - quantity  
 - unit_price  
 - line_total  
@@ -260,7 +260,7 @@ python app.py
 
 ---
 
-## ? Project Complete
+## ✔ Project Complete
 
 ## ER Diagram
 
