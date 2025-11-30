@@ -1,5 +1,15 @@
 // order_confirmation.html?id=###
 
+// Auto-detect backend API location
+const API_BASE = (() => {
+    // Local HTML server
+    if (window.location.origin.includes("localhost:8000")) {
+        return "http://127.0.0.1:5000";   // Your backend is running here
+    }
+    // GitHub Pages (production)
+    return "https://rowannoel.github.io/cs582FinalProject";
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
@@ -10,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadOrder(parseInt(id, 10));
 });
+
+
 
 async function loadOrder(orderId) {
     const container = document.getElementById("orderDetails");
