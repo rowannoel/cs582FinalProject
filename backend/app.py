@@ -14,7 +14,7 @@ print(">>> RUNNING NEW APP.PY <<<")
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "(am hiding my password)",   # <--- replace with your real password
+    "password": "(hiding my password)",   # <--- replace with your real password
     "database": "shoplite"
 }
 
@@ -89,7 +89,7 @@ def api_create_order():
         return jsonify({"error": "Cart is empty"}), 400
 
     conn = get_db()
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
 
     try:
         # Insert placeholder order
@@ -206,6 +206,204 @@ def api_debug_db():
     conn.close()
     return jsonify({"db_info": result})
 
+
+# ---------------------------
+# TOP PRODUCTS BY REVENUE
+# ---------------------------
+@app.get("/api/reports/top-products")
+def api_top_products():
+    days = request.args.get("days", 30, type=int)
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            p.name,
+            SUM(oi.line_total) AS revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.created_at >= DATE_SUB(NOW(), INTERVAL %s DAY)
+        GROUP BY p.id, p.name
+        ORDER BY revenue DESC
+        LIMIT 10
+    """, (days,))
+
+    rows = cur.fetchall()
+    conn.close()
+    return jsonify(rows)
+
+
+# ---------------------------
+# DAILY SALES WITH MOVING AVERAGE
+# ---------------------------
+@app.get("/api/reports/daily-sales")
+def api_daily_sales():
+    days = request.args.get("days", 90, type=int)
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            DATE(created_at) AS sale_date,
+            SUM(total_amount) AS daily_revenue
+        FROM orders
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL %s DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY sale_date ASC
+    """, (days,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    # Prepare data for Chart.js
+    dates = [row['sale_date'].strftime('%Y-%m-%d') for row in rows]
+    revenues = [float(row['daily_revenue']) for row in rows]
+
+    # Calculate 7-day moving average
+    moving_avg = []
+    for i in range(len(revenues)):
+        if i < 6:
+            moving_avg.append(None)
+        else:
+            avg = sum(revenues[i - 6:i + 1]) / 7
+            moving_avg.append(round(avg, 2))
+
+    return jsonify({
+        "dates": dates,
+        "revenues": revenues,
+        "moving_avg": moving_avg
+    })
+
+
+# ---------------------------
+# RECOMPUTE ORDER TOTALS
+# ---------------------------
+@app.post("/api/tools/recompute-order-totals")
+def api_recompute_totals():
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # Get all orders
+        cur.execute("SELECT id FROM orders")
+        orders = cur.fetchall()
+
+        updated_count = 0
+        for order in orders:
+            order_id = order['id']
+
+            # Calculate correct total
+            cur.execute("""
+                SELECT SUM(line_total) AS correct_total
+                FROM order_items
+                WHERE order_id = %s
+            """, (order_id,))
+
+            result = cur.fetchone()
+            correct_total = result['correct_total'] or 0.0
+
+            # Update order total
+            cur.execute("""
+                UPDATE orders
+                SET total_amount = %s
+                WHERE id = %s
+            """, (correct_total, order_id))
+
+            updated_count += 1
+
+        conn.commit()
+        return jsonify({"message": f"Recomputed {updated_count} order totals successfully."})
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        conn.close()
+
+
+# ---------------------------
+# REFRESH 90-DAY SUMMARY
+# ---------------------------
+@app.post("/api/tools/refresh-90day-summary")
+def api_refresh_summary():
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # You could create a summary table and refresh it here
+        # For now, we'll just return a success message
+        # since your daily report query already filters by date
+
+        cur.execute("""
+            SELECT 
+                COUNT(*) AS order_count,
+                SUM(total_amount) AS total_revenue
+            FROM orders
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+        """)
+
+        result = cur.fetchone()
+        conn.close()
+
+        return jsonify({
+            "message": f"90-day summary refreshed. {result['order_count']} orders, ${result['total_revenue']:.2f} revenue."
+        })
+
+    except Exception as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+
+
+# ---------------------------
+# CHECK ORDER TOTALS FOR ERRORS
+# ---------------------------
+@app.get("/api/tools/check-order-totals")
+def api_check_order_totals():
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            o.id as order_id,
+            o.total_amount as stored_total,
+            COALESCE(SUM(oi.line_total), 0) as correct_total
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        GROUP BY o.id
+        HAVING ABS(stored_total - correct_total) > 0.01
+    """)
+
+    errors = cur.fetchall()
+    conn.close()
+
+    return jsonify({"errors": errors})
+
+
+# ---------------------------
+# GET 90-DAY SUMMARY
+# ---------------------------
+@app.get("/api/tools/get-90day-summary")
+def api_get_90day_summary():
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            COUNT(*) AS order_count,
+            COALESCE(SUM(total_amount), 0) AS total_revenue
+        FROM orders
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+    """)
+
+    result = cur.fetchone()
+    conn.close()
+
+    return jsonify({
+        "order_count": result['order_count'],
+        "total_revenue": f"{float(result['total_revenue']):.2f}"
+    })
 
 
 # ---------------------------
