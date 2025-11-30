@@ -5,7 +5,7 @@
     <title>Data Tools</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/cart.js" defer></script>
-    <script src="js/data_tools.js" defer></script>
+    <script src="js/data_tools.js"></script>
     <meta http-equiv="Content-Security-Policy"
 	      content="
 	        default-src 'self' https://rowannoel.github.io https://cdn.jsdelivr.net;
@@ -28,8 +28,19 @@
 
 <h2>Data Tools</h2>
 
-<button onclick="recomputeTotals()">Recompute Order Totals</button>
-<button onclick="refreshSummary()">Refresh 90-Day Summary</button>
+<section>
+    <h3>Order Totals Status</h3>
+    <button onclick="checkOrderTotals()">Check for Errors</button>
+    <div id="orderTotalsStatus"></div>
+    <button onclick="recomputeTotals()">Recompute Order Totals</button>
+</section>
+
+<section>
+    <h3>90-Day Summary</h3>
+    <div id="summaryBefore"></div>
+    <button onclick="refreshSummary()">Refresh 90-Day Summary</button>
+    <div id="summaryAfter"></div>
+</section>
 
 <div id="toolsResult"></div>
 
