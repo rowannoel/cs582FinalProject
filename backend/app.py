@@ -27,18 +27,31 @@ def get_db():
 # ---------------------------
 @app.get("/api/products")
 def api_products():
+    search = request.args.get("search", "").strip()
+    category = request.args.get("category", "").strip()
+
     conn = get_db()
     cur = conn.cursor(dictionary=True)
-    print(">>> DB CONNECTION:", conn)
-    cur.execute("SELECT @@hostname, @@port;")
-    print(">>> ACTUAL MYSQL:", cur.fetchall())
-    cur.execute("SELECT DATABASE();")
-    print(">>> USING DB:", cur.fetchall())
 
-    cur.execute("SELECT * FROM products;")
+    query = "SELECT * FROM products WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND name LIKE %s"
+        params.append(f"%{search}%")
+
+    if category:
+        query += " AND category = %s"
+        params.append(category)
+
+    query += " ORDER BY name ASC"
+
+    cur.execute(query, tuple(params))
     rows = cur.fetchall()
+
     conn.close()
     return jsonify(rows)
+
 
 
 # ---------------------------
@@ -404,6 +417,24 @@ def api_get_90day_summary():
         "order_count": result['order_count'],
         "total_revenue": f"{float(result['total_revenue']):.2f}"
     })
+
+# ---------------------------
+# GET SINGLE PRODUCT BY ID
+# ---------------------------
+@app.get("/api/products/<int:product_id>")
+def api_get_single_product(product_id):
+    conn = get_db()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return jsonify({"error": "Product not found"}), 404
+
+    return jsonify(row)
+
 
 
 # ---------------------------
