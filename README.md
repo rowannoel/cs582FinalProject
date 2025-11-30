@@ -262,5 +262,51 @@ python app.py
 
 ## ✔ Project Complete
 
+## ER Diagram
+
+```mermaid
+erDiagram
+    PRODUCTS ||--o{ ORDER_ITEMS : "product_id"
+    ORDERS ||--o{ ORDER_ITEMS : "order_id"
+
+    PRODUCTS {
+        int id PK
+        varchar name
+        text description
+        decimal price
+        varchar category
+        int stock_quantity
+        int reorder_level
+        timestamp created_at
+    }
+
+    ORDERS {
+        int id PK
+        varchar customer_name
+        varchar customer_email
+        varchar customer_address
+        varchar customer_city
+        varchar customer_state
+        varchar customer_zip
+        decimal total_amount
+        timestamp created_at
+    }
+
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+        decimal unit_price
+        decimal line_total
+    }
+
+    DAILY_SALES_SUMMARY {
+        date sale_date PK
+        decimal total_revenue
+        int total_orders
+    }
+```
+
 
 
